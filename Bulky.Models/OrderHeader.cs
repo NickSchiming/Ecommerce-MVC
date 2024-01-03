@@ -33,7 +33,7 @@ namespace Bulky.Models
         public string? PymentIntentId { get; set; }
 
         [Required]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
         [Required]
         public string StreetAddress { get; set; }
         [Required]
