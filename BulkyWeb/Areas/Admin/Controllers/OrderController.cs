@@ -5,6 +5,7 @@ using Bulky.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BulkyWeb.Areas.Admin.Controllers
 {
@@ -68,27 +69,38 @@ namespace BulkyWeb.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult GetAll(string status)
         {
-            IEnumerable<OrderHeader> objOrderHeaders = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser").ToList();
+            IEnumerable<OrderHeader> objOrderHeaders;
             
-
-            switch (status)
+            if(User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
             {
-                case "pending":
-                    objOrderHeaders = objOrderHeaders.Where(u => u.PaymentStatus == SD.PaymentStatusDelayedPayment).ToList();
-                    break;
-                case "inprocess":
-                    objOrderHeaders = objOrderHeaders.Where(u => u.OrderStatus == SD.StatusProcessing).ToList();
-                    break;
-                case "completed":
-                    objOrderHeaders = objOrderHeaders.Where(u => u.OrderStatus == SD.StatusShipped).ToList();
-                    break;
-                case "approved":
-                    objOrderHeaders = objOrderHeaders.Where(u => u.OrderStatus == SD.StatusApproved).ToList();
-                    break;
-                default:
-                    break;
-
+                objOrderHeaders = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser").ToList();
             }
+            else
+            {
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+                objOrderHeaders = _unitOfWork.OrderHeader.GetAll(u => u.ApplicationUserId == userId, includeProperties: "ApplicationUser").ToList();
+            }
+
+                switch (status)
+                {
+                    case "pending":
+                        objOrderHeaders = objOrderHeaders.Where(u => u.PaymentStatus == SD.PaymentStatusDelayedPayment).ToList();
+                        break;
+                    case "inprocess":
+                        objOrderHeaders = objOrderHeaders.Where(u => u.OrderStatus == SD.StatusProcessing).ToList();
+                        break;
+                    case "completed":
+                        objOrderHeaders = objOrderHeaders.Where(u => u.OrderStatus == SD.StatusShipped).ToList();
+                        break;
+                    case "approved":
+                        objOrderHeaders = objOrderHeaders.Where(u => u.OrderStatus == SD.StatusApproved).ToList();
+                        break;
+                    default:
+                        break;
+
+                }
 
             return Json(new { data = objOrderHeaders });
         }
