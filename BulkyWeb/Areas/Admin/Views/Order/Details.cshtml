@@ -1,7 +1,7 @@
 ﻿@model OrderVM
 
 <form method="post">
-    <input type="hidden" asp-for="OrderHeader.Id" />
+    <input asp-for="OrderHeader.Id" hidden />
     <br />
     <div class="container">
         <div class="card">
@@ -11,7 +11,7 @@
                         <i class="fas fa-shopping-cart"></i> &nbsp; Order Summary
                     </div>
                     <div class="col-12 col-md-4 offset-md-2 text-right">
-                        <a asp-action="index" class="btn btn-outline-info form-control btn-sm">Back to Orders</a>
+                        <a asp-action="Index" class="btn btn-outline-info form-control btn-sm">Back to Orders</a>
                     </div>
                 </div>
             </div>
@@ -154,7 +154,6 @@
                                 </div>
                             </div>
 
-
                             @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
                             {
                                 <div class="row my-1">
@@ -174,7 +173,6 @@
                                     </div>
                                 </div>
                             }
-
                             <div class="row my-1">
 
                                 @if (Model.OrderHeader.SessionId == null)
@@ -204,7 +202,6 @@
                             {
                                 <button type="submit" asp-action="UpdateOrderDetail" class="btn btn-warning form-control my-1">Update Order Details</button>
                             }
-
                         </div>
                         <div class="col-12 col-lg-5 offset-lg-1">
                             <h4 class="d-flex justify-content-between align-items-center mb-3">
@@ -224,12 +221,11 @@
                                                 <small class="text-muted">Quantity : @detail.Count</small>
                                             </div>
                                             <div class="col-4 text-end">
-                                                <p class="text-success">@((@detail.Count * detail.Price).ToString("c"))</p>
+                                                <p class="text-success">@((detail.Count * detail.Price).ToString("c"))</p>
                                             </div>
                                         </div>
                                     </li>
                                 }
-
                                 <li class="list-group-item bg-primary">
                                     <div class="row container">
                                         <div class="col-6">
@@ -242,11 +238,11 @@
                                 </li>
                             </ul>
 
-                            @if (Model.OrderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment && Model.OrderHeader.OrderStatus == SD.StatusShipped)
+                            @if (Model.OrderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment &&
+                            Model.OrderHeader.OrderStatus == SD.StatusShipped)
                             {
                                 <button type="submit" class="btn btn-success form-control my-1">Pay Now</button>
                             }
-
                             @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
                             {
                                 @if (Model.OrderHeader.OrderStatus == SD.StatusApproved)
@@ -275,3 +271,31 @@
         </div>
     </div>
 </form>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function validateInput(){
+            if(document.getElementById("trackingNumber").value==""){
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please enter tracking number!',
+                });
+                return false;
+            }
+            if (document.getElementById("carrier").value =="") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please enter carrier!',
+                });
+                return false;
+            }
+            return true;
+        }
+    </script>
+
+}
